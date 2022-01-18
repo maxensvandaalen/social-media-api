@@ -1,9 +1,3 @@
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-client = TestClient(app)
-
-def test_get_all_posts():
+def test_get_all_posts(client):
     response = client.get("/posts/")
     assert response.status_code == 200
