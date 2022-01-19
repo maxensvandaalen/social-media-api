@@ -11,3 +11,7 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 def read_posts(db: Session = Depends(get_db)):
     return db.query(models.Post).all()
 
+
+@router.get("/{post_id}", response_model=schemas.Post )
+def read_post_by_id(post_id: int, db: Session = Depends(get_db)):
+    return db.query(models.Post).filter(models.Post.id == post_id).first()
