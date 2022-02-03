@@ -23,9 +23,16 @@ class Post(PostBase):
 
 class UserBase(BaseModel):
     name: str
+    email: str
+    password: str
+
+
+class UserCreate(UserBase):
+    pass
 
 
 class User(UserBase):
     id: int
-    email: str
-    password: str
+
+    class Config:
+        orm_mode = True
