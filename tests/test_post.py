@@ -1,3 +1,6 @@
+from pytest import mark
+
+
 def test_get_all_posts(client):
     response = client.get("/posts/")
     assert response.status_code == 200
@@ -17,12 +20,16 @@ def test_get_post_non_exist(create_test_post, client):
     assert response.json() == {"detail": "post with id: 12345 does not exist"}
 
 
-def test_create_post(create_test_user, client):
+@mark.parametrize("title, content, is_published", [
+    ("a title", "some content", True),
+    ("another title", "other content", False),])
+def test_create_post(create_test_user, client, title, content, is_published):
     response = client.post(
         "/posts/?user_id=1",
-        json={"title": "a title", "content": "some content"}
+        json={"title": title, "content": content, "is_published": is_published}
     )
     assert response.status_code == 201
     data = response.json()
-    assert data["title"] == "a title"
-    assert data["content"] == "some content"
+    assert data["title"] == title
+    assert data["content"] == content
+    assert data["is_published"] == is_published
