@@ -50,4 +50,20 @@ def delete_post(user_id: int, post_id: int, db: Session = Depends(get_db)):
     db.commit()
 
 
-# TODO update post
+@router.put("/{post_id}", response_model=schemas.Post)
+def update_post(updated_post: schemas.PostCreate, user_id: int, post_id: int, db: Session = Depends(get_db)):
+    post_query = db.query(models.Post).filter(models.Post.id == post_id)
+    post = post_query.first()
+
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"post with id: {post_id} does not exist")
+
+    if post.owner_id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="not authorized to perform the request")
+
+    post_query.update(updated_post.dict(), synchronize_session=False)
+    db.commit()
+
+    return post_query.first()

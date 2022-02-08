@@ -48,3 +48,33 @@ def test_delete_post_non_exist(create_test_user, client):
 def test_delete_post_other_user_post(create_test_post, client):
     response = client.delete("/posts/1?user_id=2")
     assert response.status_code == 403
+
+
+def test_update_post(create_test_post, client):
+    response = client.put(
+        "/posts/1?user_id=1",
+        json={"title": "updated title",
+              "content": "updated content"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == "updated title"
+    assert data["content"] == "updated content"
+
+
+def test_update_post_non_exist(create_test_user, client):
+    response = client.put(
+        "/posts/1?user_id=1",
+        json={"title": "updated title",
+              "content": "updated content"}
+    )
+    assert response.status_code == 404
+
+
+def test_update_post_other_user_post(create_test_post, client):
+    response = client.put(
+        "/posts/1?user_id=3",
+        json={"title": "updated title",
+              "content": "updated content"}
+    )
+    assert response.status_code == 403
