@@ -22,7 +22,7 @@ def test_get_post_non_exist(create_test_post, client):
 
 @mark.parametrize("title, content, is_published", [
     ("a title", "some content", True),
-    ("another title", "other content", False),])
+    ("another title", "other content", False), ])
 def test_create_post(create_test_user, client, title, content, is_published):
     response = client.post(
         "/posts/?user_id=1",
@@ -33,3 +33,18 @@ def test_create_post(create_test_user, client, title, content, is_published):
     assert data["title"] == title
     assert data["content"] == content
     assert data["is_published"] == is_published
+
+
+def test_delete_post(create_test_post, client):
+    response = client.delete("/posts/1?user_id=1")
+    assert response.status_code == 200
+
+
+def test_delete_post_non_exist(create_test_user, client):
+    response = client.delete("/posts/1234?user_id=1")
+    assert response.status_code == 404
+
+
+def test_delete_post_other_user_post(create_test_post, client):
+    response = client.delete("/posts/1?user_id=2")
+    assert response.status_code == 403
