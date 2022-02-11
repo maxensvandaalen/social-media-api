@@ -6,6 +6,7 @@ from app.config import settings
 from app.main import app
 from app.database import Base, get_db
 from app.models import Post, User
+from app.utils import get_password_hash
 
 testdatabase = f"{settings.SQLALCHEMY_DATABASE_URL}_test"
 
@@ -41,10 +42,11 @@ def client(session):
 
 @fixture
 def create_test_user(session):
+    hashed_password = get_password_hash("verygoodpassword")
     user = {
         "name": "John Doe",
         "email": "john_doe@gmail.com",
-        "password": "verygoodpassword"
+        "password": hashed_password
     }
 
     db_user = User(**user)
