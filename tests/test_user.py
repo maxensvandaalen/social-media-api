@@ -1,5 +1,3 @@
-from app.utils import get_password_hash
-
 
 def test_create_user(client):
     response = client.post(
@@ -13,7 +11,7 @@ def test_create_user(client):
     assert data["email"] == "john_doe@doe.com"
 
 
-def test_create_user_existing_username(create_test_user, client):
+def test_create_user_existing_username(first_test_user, client):
     response = client.post(
         "/users/",
         json={"name": "John Doe", "email": "other@email.com",
@@ -23,7 +21,7 @@ def test_create_user_existing_username(create_test_user, client):
     assert response.json() == {"detail": "this username is already registered"}
 
 
-def test_create_user_existing_email(create_test_user, client):
+def test_create_user_existing_email(first_test_user, client):
     response = client.post(
         "/users/",
         json={"name": "OtherUserName", "email": "john_doe@gmail.com",
@@ -32,3 +30,5 @@ def test_create_user_existing_email(create_test_user, client):
     assert response.status_code == 409
     assert response.json() == {
         "detail": "this emailadress is already registered"}
+
+# TODO test login of user route

@@ -19,23 +19,26 @@ ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def get_user(user_name: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.name == user_name).first()
+def get_user(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.name == username).first()
     return user
 
 
 def authenticate_user(username: str, password: str, db: Session = Depends(get_db)):
-    user = get_user(db, username)
+    user = get_user(username, db)
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         return False
     return user
 
 
-def create_access_token(data: dict):
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -55,7 +58,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(db, username=token_data.username)
+    user = get_user(token_data.username, db)
     if user is None:
         raise credentials_exception
     return user

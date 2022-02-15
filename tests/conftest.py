@@ -7,6 +7,7 @@ from app.main import app
 from app.database import Base, get_db
 from app.models import Post, User
 from app.utils import get_password_hash
+from app.oauth2 import create_access_token
 
 testdatabase = f"{settings.SQLALCHEMY_DATABASE_URL}_test"
 
@@ -40,22 +41,36 @@ def client(session):
     yield TestClient(app)
 
 
-@fixture
-def create_test_user(session):
-    hashed_password = get_password_hash("verygoodpassword")
-    user = {
-        "name": "John Doe",
-        "email": "john_doe@gmail.com",
-        "password": hashed_password
-    }
-
+def create_test_user(user, session):
+    user["password"] = get_password_hash(user["password"])
     db_user = User(**user)
     session.add(db_user)
     session.commit()
-    return db_user
+    return session.query(User).first()
+
 
 @fixture
-def create_test_post(create_test_user, session):
+def first_test_user(session):
+    user = {
+        "name": "John Doe",
+        "email": "john_doe@gmail.com",
+        "password": "verygoodpassword"
+    }
+    return create_test_user(user, session)
+
+
+@fixture
+def second_test_user(session):
+    user = {
+        "name": "Jane Doe",
+        "email": "janedoe@outlook.com",
+        "password": "1234567890"
+    }
+    return create_test_user(user, session)
+
+
+@fixture
+def first_test_post(first_test_user, session):
     post = {
         "title": "Some title",
         "content": "Some content",
@@ -66,4 +81,27 @@ def create_test_post(create_test_user, session):
     session.add(db_post)
     session.commit()
 
-    
+
+@fixture
+def second_test_post(second_test_user, session):
+    post = {
+        "title": "second post",
+        "content": "Some content",
+        "owner_id": 2
+    }
+
+    db_post = Post(**post)
+    session.add(db_post)
+    session.commit()
+
+
+@fixture
+def authorized_client(first_test_user, client):
+    access_token = create_access_token(
+        data={"sub": first_test_user.name}
+    )
+    client.headers = {
+        **client.headers,
+        "Authorization": f"Bearer {access_token}"
+    }
+    return client
