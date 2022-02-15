@@ -46,12 +46,13 @@ def create_test_user(user, session):
     db_user = User(**user)
     session.add(db_user)
     session.commit()
-    return session.query(User).first()
+    return db_user
 
 
 @fixture
 def first_test_user(session):
     user = {
+        "id": 1,
         "name": "John Doe",
         "email": "john_doe@gmail.com",
         "password": "verygoodpassword"
@@ -62,6 +63,7 @@ def first_test_user(session):
 @fixture
 def second_test_user(session):
     user = {
+        "id": 2,
         "name": "Jane Doe",
         "email": "janedoe@outlook.com",
         "password": "1234567890"
@@ -74,7 +76,7 @@ def first_test_post(first_test_user, session):
     post = {
         "title": "Some title",
         "content": "Some content",
-        "owner_id": 1
+        "owner_id": first_test_user.id
     }
 
     db_post = Post(**post)
@@ -87,7 +89,7 @@ def second_test_post(second_test_user, session):
     post = {
         "title": "second post",
         "content": "Some content",
-        "owner_id": 2
+        "owner_id": second_test_user.id
     }
 
     db_post = Post(**post)
