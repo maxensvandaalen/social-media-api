@@ -30,5 +30,3 @@ def test_create_user_existing_email(first_test_user, client):
     assert response.status_code == 409
     assert response.json() == {
         "detail": "this emailadress is already registered"}
-
-# TODO test login of user route
