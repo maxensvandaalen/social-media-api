@@ -6,6 +6,12 @@ def test_get_all_posts(authorized_client):
     assert response.status_code == 200
 
 
+def test_get_all_posts_unauthorized(client):
+    response = client.get("/posts/")
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Not authenticated'}
+
+
 def test_get_post_by_id(first_test_post, authorized_client):
     response = authorized_client.get("/posts/1")
     assert response.status_code == 200
@@ -14,10 +20,16 @@ def test_get_post_by_id(first_test_post, authorized_client):
     assert data["content"] == "Some content"
 
 
-def test_get_post_non_exist(first_test_post, authorized_client):
+def test_get_post_by_id_non_exist(first_test_post, authorized_client):
     response = authorized_client.get("/posts/12345")
     assert response.status_code == 404
     assert response.json() == {"detail": "post with id: 12345 does not exist"}
+
+
+def test_get_post_by_id_unauthorized(first_test_post, client):
+    response = client.get("/posts/1")
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Not authenticated'}
 
 
 @mark.parametrize("title, content, is_published", [
@@ -35,6 +47,15 @@ def test_create_post(first_test_user, authorized_client, title, content, is_publ
     assert data["is_published"] == is_published
 
 
+def test_create_post_unauthorized(client):
+    response = client.post(
+        "/posts/",
+        json={"title": "title", "content": "content", "is_published": True}
+    )
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Not authenticated'}
+
+
 def test_delete_post(first_test_post, authorized_client):
     response = authorized_client.delete("/posts/1")
     assert response.status_code == 200
@@ -48,6 +69,12 @@ def test_delete_post_non_exist(first_test_user, authorized_client):
 def test_delete_post_other_user_post(first_test_post, second_test_post, authorized_client):
     response = authorized_client.delete("/posts/2")
     assert response.status_code == 403
+
+
+def test_delete_post_unauthorized(client):
+    response = client.get("/posts/")
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Not authenticated'}
 
 
 def test_update_post(first_test_post, authorized_client):
@@ -78,3 +105,13 @@ def test_update_post_other_user_post(first_test_post, second_test_post, authoriz
               "content": "updated content"}
     )
     assert response.status_code == 403
+
+
+def test_update_post_unauthorized(first_test_post, client):
+    response = client.put(
+        "/posts/1",
+        json={"title": "updated title",
+              "content": "updated content"}
+    )
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Not authenticated'}
