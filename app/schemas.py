@@ -54,3 +54,21 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+
+class CommentBase(BaseModel):
+    content: str
+    post_id: int
+    owner_id: int
+
+
+class Comment(CommentBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class CommentCreate(CommentBase):
+    pass
