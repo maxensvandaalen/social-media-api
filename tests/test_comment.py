@@ -14,3 +14,33 @@ def test_get_all_comments_unauthorized_user(comments, client):
     response = client.get("/comments/")
     assert response.status_code == 401
     assert response.json() == {'detail': 'Not authenticated'}
+
+
+def test_create_comment(first_test_post, authorized_client):
+    response = authorized_client.post(
+        "/comments/",
+        json={"post_id": 1, "content": "a comment"}
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["post_id"] == 1
+    assert data["owner_id"] == 1
+    assert data["content"] == "a comment"
+
+
+def test_create_comment_non_existing_post(authorized_client):
+    response = authorized_client.post(
+        "/comments/",
+        json={"post_id": 1, "content": "a comment"}
+    )
+    assert response.status_code == 404
+    assert response.json() == {"detail": "post with id: 1 does not exist"}
+
+
+def test_create_comment_unauthorized_user(first_test_post, client):
+    response = client.post(
+        "/comments/",
+        json={"post_id": 1, "content": "a comment"}
+    )
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Not authenticated'}

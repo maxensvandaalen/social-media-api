@@ -59,11 +59,12 @@ class TokenData(BaseModel):
 class CommentBase(BaseModel):
     content: str
     post_id: int
-    owner_id: int
+    
 
 
 class Comment(CommentBase):
     id: int
+    owner_id: int
     created_at: datetime
 
     class Config:
