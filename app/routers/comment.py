@@ -48,5 +48,22 @@ def delete_comment(comment_id: int, db: Session = Depends(get_db), current_user:
     comment_query.delete(synchronize_session=False)
     db.commit()
 
-# TODO
-# def update comment
+
+@router.put("/{comment_id}")
+def update_comment(comment_id: int, updated_comment: schemas.CommentUpdate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    comment_query = db.query(models.Comment).filter(
+        models.Comment.id == comment_id)
+    comment = comment_query.first()
+
+    if not comment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"comment with id: {comment_id} does not exist")
+
+    if comment.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="not authorized to perform the request")
+
+    comment_query. update(updated_comment.dict(), synchronize_session=False)
+    db.commit()
+
+    return comment_query.first()

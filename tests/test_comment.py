@@ -67,3 +67,40 @@ def test_delete_comment_unauthorized_user(comments, client):
     response = client.delete("/comments/1")
     assert response.status_code == 401
     assert response.json() == {'detail': 'Not authenticated'}
+
+
+def test_update_comment(comments, authorized_client):
+    response = authorized_client.put(
+        "/comments/2",
+        json={"content": "updated content"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["content"] == "updated content"
+
+
+def test_update_comment_other_user_post(comments, authorized_client):
+    response = authorized_client.put(
+        "/comments/1",
+        json={"content": "updated content"}
+    )
+    assert response.status_code == 403
+    assert response.json() == {'detail': 'not authorized to perform the request'}
+
+
+def test_update_comment_non_existing(comments, authorized_client):
+    response = authorized_client.put(
+        "/comments/789",
+        json={"content": "updated content"}
+    )
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'comment with id: 789 does not exist'}
+
+
+def test_update_comments_unauthorized(comments, client):
+    response = client.put(
+        "/comments/2",
+        json={"content": "updated content"}
+    )
+    assert response.status_code == 401
+    assert response.json() == {'detail': 'Not authenticated'}

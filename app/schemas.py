@@ -58,12 +58,11 @@ class TokenData(BaseModel):
 
 class CommentBase(BaseModel):
     content: str
-    post_id: int
-    
 
 
 class Comment(CommentBase):
     id: int
+    post_id: int
     owner_id: int
     created_at: datetime
 
@@ -72,4 +71,8 @@ class Comment(CommentBase):
 
 
 class CommentCreate(CommentBase):
+    post_id: int
+
+
+class CommentUpdate(CommentBase):
     pass
